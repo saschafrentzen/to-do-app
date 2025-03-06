@@ -5,7 +5,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
 
-  // Beim Laden der Seite Aufgaben abrufen
+  // Aufgaben von Backend laden
   useEffect(() => {
     fetch("http://localhost:3050/liste_abrufen")
       .then((res) => res.json())
@@ -14,7 +14,7 @@ function App() {
 
   // Neue Aufgabe hinzufügen
   const itemHinzufügen = () => {
-    if (!title.trim()) return; // Falls das Feld leer ist, nichts tun
+    if (!title.trim()) return; // Falls das Eingabefeld leer ist, nichts tun
 
     fetch("http://localhost:3050/add", {
       method: "POST",
@@ -22,15 +22,16 @@ function App() {
       body: JSON.stringify({ title }),
     })
     .then((res) => res.json())
-    .then((newTask) => setTasks([...tasks, newTask])); // Neue Aufgabe zur Liste hinzufügen
+    .then((newTask) => setTasks([...tasks, newTask])); // UI aktualisieren
 
-    setTitle(""); // Eingabefeld leeren
+    setTitle(""); // Eingabefeld nach dem Hinzufügen leeren
   };
 
   return (
     <>
       <h1>📝 TO-DO-Liste</h1>
       <input 
+        type="text"
         value={title} 
         onChange={(e) => setTitle(e.target.value)} 
         placeholder="Neue Aufgabe eingeben..."
@@ -49,3 +50,4 @@ function App() {
 }
 
 export default App;
+
