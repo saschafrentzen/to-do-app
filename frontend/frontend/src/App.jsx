@@ -5,50 +5,47 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
 
+  // Beim Laden der Seite Aufgaben abrufen
   useEffect(() => {
     fetch("http://localhost:3050/liste_abrufen")
-    .then((res) => res.json())
-    .then(setTasks);
+      .then((res) => res.json())
+      .then(setTasks);
   }, []);
 
+  // Neue Aufgabe hinzufügen
   const itemHinzufügen = () => {
+    if (!title.trim()) return; // Falls das Feld leer ist, nichts tun
 
     fetch("http://localhost:3050/add", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({title}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
     })
-    .then(() => fetch("http://localhost:3050/liste_abrufen"))
     .then((res) => res.json())
-    .then(setTasks);
+    .then((newTask) => setTasks([...tasks, newTask])); // Neue Aufgabe zur Liste hinzufügen
 
-  setTitle(""); 
+    setTitle(""); // Eingabefeld leeren
   };
-
-  console.log(tasks)
 
   return (
     <>
-    <h1>TO-DO-Liste</h1>
-    <input value={title}
-    onChange={(e) => setTitle(e.target.value)} 
-    />
-    <button onClick={itemHinzufügen} >Add</button>
-    <ul>
-      {// hier gehört der code , um die To-Do-Liste dynamisch zu gestalten
-     tasks.map(({ id, title, completed }) => (
-      <li key={id}>
-        <input type='checkbox' /> {title} {completed}
-      </li>
-    ))
+      <h1>📝 TO-DO-Liste</h1>
+      <input 
+        value={title} 
+        onChange={(e) => setTitle(e.target.value)} 
+        placeholder="Neue Aufgabe eingeben..."
+      />
+      <button onClick={itemHinzufügen}>Hinzufügen</button>
 
-      }
-
-
-      <li><input type="checkbox" />NodeJS Lernen <button>X</button></li>
+      <ul>
+        {tasks.map(({ id, title, completed }) => (
+          <li key={id}>
+            <input type="checkbox" defaultChecked={completed} /> {title}
+          </li>
+        ))}
       </ul>
-      </>
-  )
+    </>
+  );
 }
 
 export default App;

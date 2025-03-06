@@ -1,53 +1,55 @@
 const express = require('express');
-const sqlite3 = require('sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-
-//TODO: Verbinde eine Datenbank dazu
-
 const db = new sqlite3.Database('./tasks.db');
 
-app.use(bodyParser.json());   // Middleware
-app.use(cors());             // Middleware
+app.use(bodyParser.json());
+app.use(cors());
 
-db.run('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, completed BOOLEAN DEFAULT 0)');
+// Datenbank-Tabelle erstellen (falls nicht vorhanden)
+db.run(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    title TEXT, 
+    completed BOOLEAN DEFAULT 0
+  )
+`);
 
-
-db.run('INSERT INTO tasks (title) VALUES (?)', "Zähne putzen");
-
-//TODU: Schreibe request/responses
-
-
+// API-Endpunkte
 app.get('/', (req, res) => {
-    res.send('request received');
+    res.send('Server läuft!');
 });
 
-app.get('/', (req, res) => {
-    res.send('Vielen dank Sascha');
-});
-// wenn ein neues item hinzugefügt werden solll, soll NodeJS Server diesen Request so behandeln
-app.post('/add', (req, res) => {
-    db.run('INSERT INTO tasks (title) VALUES (?)', [req.body.title], function () {
-    res.json({tag: "Mittwoch", bald_wirds: "Mittagspause"});
+// Alle Aufgaben abrufen
+app.get('/liste_abrufen', (req, res) => {
+    db.all('SELECT * FROM tasks', (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
     });
 });
 
-// Liste mit alle existierenden Items
-// hier sollte nur alle Items als json im Response geschrieben werden 
-app.get('/liste_abrufen', (req, res) => {
-    db.all('SELECT * FROM tasks', function (err, rows){
-        res.json(rows)
-
-    })
+// Aufgabe hinzufügen
+app.post('/add', (req, res) => {
+    const { title } = req.body;
+    if (!title) {
+        return res.status(400).json({ error: "Title darf nicht leer sein!" });
+    }
+    db.run('INSERT INTO tasks (title, completed) VALUES (?, ?)', [title, 0], function (err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ id: this.lastID, title, completed: 0 });
+    });
 });
 
-
-
-app.listen(3050, "localhost", () => {
-    console.log("bald ist Mittagspause")
+// Server starten
+app.listen(3050, () => {
+    console.log("🚀 Server läuft auf http://localhost:3050");
 });
-
-// Test
-//curl -X POST "http://localhost:3050/add" -H "Content-Type: application/json" -d '{ "title": "NodeJS lernen" }'
