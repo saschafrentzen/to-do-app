@@ -1,6 +1,8 @@
 const express = require('express');
 const sqlite3 = require('sqlite3');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const app = express();
 
 //TODO: Verbinde eine Datenbank dazu
@@ -8,6 +10,7 @@ const app = express();
 const db = new sqlite3.Database('./tasks.db');
 
 app.use(bodyParser.json());   // Middleware
+app.use(cors());             // Middleware
 
 db.run('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, completed BOOLEAN DEFAULT 0)');
 
