@@ -24,13 +24,27 @@ app.get('/', (req, res) => {
 app.get('/', (req, res) => {
     res.send('Vielen dank Sascha');
 });
-
+// wenn ein neues item hinzugefügt werden solll, soll NodeJS Server diesen Request so behandeln
 app.post('/add', (req, res) => {
-    db.run('INSERT INTO tasks (title) VALUES (?)', [req.body.title], function (){
+    db.run('INSERT INTO tasks (title) VALUES (?)', [req.body.title], function () {
     res.json({tag: "Mittwoch", bald_wirds: "Mittagspause"});
     });
 });
 
+// Liste mit alle existierenden Items
+// hier sollte nur alle Items als json im Response geschrieben werden 
+app.get('/liste_abrufen', (req, res) => {
+    db.all('SELECT * FROM tasks', function (err, rows){
+        res.json(rows)
+
+    })
+});
+
+
+
 app.listen(3050, "localhost", () => {
     console.log("bald ist Mittagspause")
 });
+
+// Test
+//curl -X POST "http://localhost:3050/add" -H "Content-Type: application/json" -d '{ "title": "NodeJS lernen" }'
