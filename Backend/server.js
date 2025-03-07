@@ -6,6 +6,7 @@ const cors = require('cors');
 const app = express();
 const db = new sqlite3.Database('./tasks.db');
 
+// Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -14,6 +15,7 @@ db.run(`
   CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT, 
     title TEXT, 
+    category TEXT, 
     completed BOOLEAN DEFAULT 0
   )
 `);
@@ -36,16 +38,20 @@ app.get('/liste_abrufen', (req, res) => {
 
 // Aufgabe hinzufügen
 app.post('/add', (req, res) => {
-    const { title } = req.body;
-    if (!title) {
-        return res.status(400).json({ error: "Title darf nicht leer sein!" });
+    const { title, category } = req.body;
+    
+    // Sicherstellen, dass der Titel und die Kategorie angegeben sind
+    if (!title || !category) {
+        return res.status(400).json({ error: "Title und Kategorie dürfen nicht leer sein!" });
     }
-    db.run('INSERT INTO tasks (title, completed) VALUES (?, ?)', [title, 0], function (err) {
+
+    // Aufgabe in die Datenbank einfügen
+    db.run('INSERT INTO tasks (title, category, completed) VALUES (?, ?, ?)', [title, category, 0], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
-        res.json({ id: this.lastID, title, completed: 0 });
+        res.json({ id: this.lastID, title, category, completed: 0 });
     });
 });
 
