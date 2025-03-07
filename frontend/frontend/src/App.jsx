@@ -50,7 +50,7 @@ function App() {
 
       <div>
         <input
-          type="text"
+          type="text"   //fehler?
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Neue Aufgabe eingeben..."
