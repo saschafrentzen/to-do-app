@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import backgroundImage from "./assets/hintergrund.jpg";
 import './App.css';
 
 function App() {
@@ -28,7 +29,16 @@ function App() {
   };
 
   return (
-    <>
+    <div 
+      className="app-container"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        height: "100vh",
+      }}
+    >
       <h1>📝 TO-DO-Liste</h1>
       <input 
         type="text"
@@ -37,7 +47,7 @@ function App() {
         placeholder="Neue Aufgabe eingeben..."
       />
       <button onClick={itemHinzufügen}>Hinzufügen</button>
-
+    
       <ul>
         {tasks.map(({ id, title, completed }) => (
           <li key={id}>
@@ -45,8 +55,10 @@ function App() {
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
+  
+  
 }
 
 export default App;
