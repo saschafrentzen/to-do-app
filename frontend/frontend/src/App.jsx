@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
-import backgroundImage from "./assets/hintergrund.jpg";
+import React, { useState, useEffect } from 'react';
+import backgroundImage from './assets/hintergrund.jpeg'; // Bild importieren
 import './App.css';
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Arbeit");
+  const [filteredTasks, setFilteredTasks] = useState([]);
 
   // Aufgaben von Backend laden
   useEffect(() => {
@@ -15,51 +17,74 @@ function App() {
 
   // Neue Aufgabe hinzufügen
   const itemHinzufügen = () => {
-    if (!title.trim()) return; // Falls das Eingabefeld leer ist, nichts tun
+    if (!title.trim()) return;
+
+    const newTask = { title, category, completed: false };
 
     fetch("http://localhost:3050/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
+      body: JSON.stringify(newTask),
     })
-    .then((res) => res.json())
-    .then((newTask) => setTasks([...tasks, newTask])); // UI aktualisieren
+      .then((res) => res.json())
+      .then((addedTask) => {
+        setTasks([...tasks, addedTask]); // Aufgabenliste aktualisieren
+        setFilteredTasks([...filteredTasks, addedTask]); // Filterliste aktualisieren
+      });
 
     setTitle(""); // Eingabefeld nach dem Hinzufügen leeren
   };
 
+  // Aufgaben nach Kategorie filtern
+  const filterTasksByCategory = (category) => {
+    setCategory(category);
+    setFilteredTasks(tasks.filter(task => task.category === category));
+  };
+
   return (
-    <div 
+    <div
       className="app-container"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        height: "100vh",
-      }}
+      style={{ backgroundImage: `url(${backgroundImage})` }} // Hintergrundbild über Inline-Stil
     >
       <h1>📝 TO-DO-Liste</h1>
-      <input 
-        type="text"
-        value={title} 
-        onChange={(e) => setTitle(e.target.value)} 
-        placeholder="Neue Aufgabe eingeben..."
-      />
-      <button onClick={itemHinzufügen}>Hinzufügen</button>
-    
+
+      <div>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Neue Aufgabe eingeben..."
+        />
+        
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="Arbeit">Arbeit</option>
+          <option value="Einkaufen">Einkaufen</option>
+          <option value="Privat">Privat</option>
+        </select>
+
+        <button onClick={itemHinzufügen}>Hinzufügen</button>
+      </div>
+
+      <div>
+        <button onClick={() => filterTasksByCategory("Arbeit")}>Arbeit</button>
+        <button onClick={() => filterTasksByCategory("Einkaufen")}>Einkaufen</button>
+        <button onClick={() => filterTasksByCategory("Privat")}>Privat</button>
+        <button onClick={() => setFilteredTasks(tasks)}>Alle Aufgaben</button>
+      </div>
+
       <ul>
-        {tasks.map(({ id, title, completed }) => (
+        {filteredTasks.map(({ id, title, completed, category }) => (
           <li key={id}>
-            <input type="checkbox" defaultChecked={completed} /> {title}
+            <input type="checkbox" defaultChecked={completed} /> 
+            {title} - <b>{category}</b>
           </li>
         ))}
       </ul>
     </div>
   );
-  
-  
 }
 
 export default App;
-
