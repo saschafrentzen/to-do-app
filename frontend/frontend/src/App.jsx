@@ -46,7 +46,7 @@ function App() {
       className="app-container"
       style={{ backgroundImage: `url(${backgroundImage})` }} // Hintergrundbild über Inline-Stil
     >
-      <h1>📝 TO-DO-Liste</h1>
+      <h1> TO-DO-Liste</h1>
 
       <div>
         <input
