@@ -42,13 +42,13 @@ function App() {
   };
 
   return (
-   
+
     <div
       className="app-container"
       style={{ backgroundImage: `url(${backgroundImage})` }} // Hintergrundbild über Inline-Stil
     >
       <h1> TO-DO-Liste</h1>
-      
+
       <div>
         <input
           type="text"   //fehler?
@@ -56,7 +56,7 @@ function App() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Neue Aufgabe eingeben..."
         />
-        
+
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -79,10 +79,11 @@ function App() {
       <ul>
         {filteredTasks.map(({ id, title, completed, category }) => (
           <li key={id}>
-            <input type="checkbox" defaultChecked={completed} /> 
-            {title} - <b>{category}</b>
+            <input type="checkbox" defaultChecked={completed} />
+            {title} - <b>{category || "Keine Kategorie"}</b>
           </li>
         ))}
+
       </ul>
     </div>
   );
