@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import backgroundImage from './assets/hintergrund.jpeg'; // Bild importieren
+import backgroundImage from './assets/hintergrund.jpeg';
 import './App.css';
 
 function App() {
@@ -8,14 +8,19 @@ function App() {
   const [category, setCategory] = useState("Arbeit");
   const [filteredTasks, setFilteredTasks] = useState([]);
 
-  // Aufgaben von Backend laden
   useEffect(() => {
     fetch("http://localhost:3050/liste_abrufen")
       .then((res) => res.json())
-      .then(setTasks);
+      .then((data) => {
+        setTasks(data);
+        filterTasksByCategory(category, data);
+      });
   }, []);
 
-  // Neue Aufgabe hinzufügen
+  useEffect(() => {
+    filterTasksByCategory(category, tasks);
+  }, [tasks, category]);
+
   const itemHinzufügen = () => {
     if (!title.trim()) return;
 
@@ -28,30 +33,54 @@ function App() {
     })
       .then((res) => res.json())
       .then((addedTask) => {
-        setTasks([...tasks, addedTask]); // Aufgabenliste aktualisieren
-        setFilteredTasks([...filteredTasks, addedTask]); // Filterliste aktualisieren
+        const updatedTasks = [...tasks, addedTask];
+        setTasks(updatedTasks);
+        filterTasksByCategory(category, updatedTasks);
       });
 
-    setTitle(""); // Eingabefeld nach dem Hinzufügen leeren
+    setTitle("");
   };
 
-  // Aufgaben nach Kategorie filtern
-  const filterTasksByCategory = (category) => {
-    setCategory(category);
-    setFilteredTasks(tasks.filter(task => task.category === category));
+  const filterTasksByCategory = (selectedCategory, taskList = tasks) => {
+    setCategory(selectedCategory);
+    setFilteredTasks(taskList.filter(task => task.category === selectedCategory));
+  };
+
+  const toggleTaskCompletion = (id) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === id) {
+        const updatedTask = { ...task, completed: !task.completed };
+        fetch(`http://localhost:3050/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedTask),
+        });
+        return updatedTask;
+      }
+      return task;
+    });
+
+    setTasks(updatedTasks);
+    filterTasksByCategory(category, updatedTasks);
+  };
+
+  const deleteTask = (id) => {
+    fetch(`http://localhost:3050/delete/${id}`, {
+      method: "DELETE",
+    }).then(() => {
+      const updatedTasks = tasks.filter(task => task.id !== id);
+      setTasks(updatedTasks);
+      filterTasksByCategory(category, updatedTasks);
+    });
   };
 
   return (
-
-    <div
-      className="app-container"
-      style={{ backgroundImage: `url(${backgroundImage})` }} // Hintergrundbild über Inline-Stil
-    >
+    <div className="app-container" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <h1> TO-DO-Liste</h1>
 
       <div>
         <input
-          type="text"  
+          type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Neue Aufgabe eingeben..."
@@ -73,18 +102,25 @@ function App() {
         <button onClick={() => filterTasksByCategory("Arbeit")}>Arbeit</button>
         <button onClick={() => filterTasksByCategory("Einkaufen")}>Einkaufen</button>
         <button onClick={() => filterTasksByCategory("Privat")}>Privat</button>
-        <button onClick={() => setFilteredTasks(tasks)}>Alle Aufgaben</button>
       </div>
 
       <ul>
         {filteredTasks.map(({ id, title, completed, category }) => (
           <li key={id}>
-            <input type="checkbox" defaultChecked={completed} />
+            <input
+              type="checkbox"
+              checked={completed}
+              onChange={() => toggleTaskCompletion(id)}
+            />
             {title} - <b>{category || "Keine Kategorie"}</b>
+            {completed && (
+              <button onClick={() => deleteTask(id)}>Löschen</button>
+            )}
           </li>
         ))}
-
       </ul>
     </div>
   );
 }
+
+export default App;
