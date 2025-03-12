@@ -3,26 +3,30 @@ import backgroundImage from './assets/hintergrund.jpeg';
 import './App.css';
 
 function App() {
+  // Zustände für Aufgabenliste, Eingabefelder und Filterung
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Arbeit");
   const [filteredTasks, setFilteredTasks] = useState([]);
 
+  // Aufgaben vom Server abrufen, wenn die Komponente geladen wird
   useEffect(() => {
     fetch("http://localhost:3050/liste_abrufen")
       .then((res) => res.json())
       .then((data) => {
         setTasks(data);
-        filterTasksByCategory(category, data);
+        filterTasksByCategory(category, data); // Sofort nach Kategorie filtern
       });
   }, []);
 
+  // Aufgabenliste filtern, wenn sich die Kategorie ändert oder neue Aufgaben kommen
   useEffect(() => {
     filterTasksByCategory(category, tasks);
   }, [tasks, category]);
 
+  // Neue Aufgabe hinzufügen
   const itemHinzufügen = () => {
-    if (!title.trim()) return;
+    if (!title.trim()) return; // Verhindert das Hinzufügen leerer Aufgaben
 
     const newTask = { title, category, completed: false };
 
@@ -38,23 +42,28 @@ function App() {
         filterTasksByCategory(category, updatedTasks);
       });
 
-    setTitle("");
+    setTitle(""); // Eingabefeld leeren
   };
 
+  // Aufgaben nach Kategorie filtern
   const filterTasksByCategory = (selectedCategory, taskList = tasks) => {
     setCategory(selectedCategory);
     setFilteredTasks(taskList.filter(task => task.category === selectedCategory));
   };
 
+  // Aufgabe als erledigt/unerledigt markieren
   const toggleTaskCompletion = (id) => {
     const updatedTasks = tasks.map(task => {
       if (task.id === id) {
         const updatedTask = { ...task, completed: !task.completed };
+
+        // Update-Request an den Server senden
         fetch(`http://localhost:3050/update/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedTask),
         });
+
         return updatedTask;
       }
       return task;
@@ -64,6 +73,7 @@ function App() {
     filterTasksByCategory(category, updatedTasks);
   };
 
+  // Aufgabe löschen
   const deleteTask = (id) => {
     fetch(`http://localhost:3050/delete/${id}`, {
       method: "DELETE",
@@ -78,6 +88,7 @@ function App() {
     <div className="app-container" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <h1> TO-DO-Liste</h1>
 
+      {/* Eingabefeld und Kategorie-Auswahl */}
       <div>
         <input
           type="text"
@@ -98,12 +109,14 @@ function App() {
         <button onClick={itemHinzufügen}>Hinzufügen</button>
       </div>
 
+      {/* Filterbuttons für Kategorien */}
       <div>
         <button onClick={() => filterTasksByCategory("Arbeit")}>Arbeit</button>
         <button onClick={() => filterTasksByCategory("Einkaufen")}>Einkaufen</button>
         <button onClick={() => filterTasksByCategory("Privat")}>Privat</button>
       </div>
 
+      {/* Aufgabenliste */}
       <ul>
         {filteredTasks.map(({ id, title, completed, category }) => (
           <li key={id}>
