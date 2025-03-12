@@ -21,9 +21,9 @@ db.run(`
 `);
 
 // API-Endpunkte
-app.get('/', (req, res) => {
-    res.send('Server läuft!');
-});
+//app.get('/', (req, res) => {
+ //   res.send('Server läuft!');
+//});
 
 // Alle Aufgaben abrufen
 app.get('/liste_abrufen', (req, res) => {
