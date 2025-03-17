@@ -20,11 +20,6 @@ db.run(`
   )
 `);
 
-// API-Endpunkte
-//app.get('/', (req, res) => {
- //   res.send('Server läuft!');
-//});
-
 // Alle Aufgaben abrufen
 app.get('/liste_abrufen', (req, res) => {
     db.all('SELECT * FROM tasks', (err, rows) => {
