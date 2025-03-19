@@ -10,7 +10,8 @@ RUN npm run build
 
 # Nginx für die Bereitstellung des Frontends
 FROM nginx:alpine
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
+
 
 # Standard-HTTP-Port
 EXPOSE 80
