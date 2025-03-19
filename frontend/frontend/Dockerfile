@@ -1,28 +1,17 @@
-# Schritt 1: Build-Phase mit Node.js
+# Frontend mit React/Vue/Angular (je nach Projekt)
 FROM node:18-alpine AS builder
-
 WORKDIR /app
 
-# Abhängigkeiten installieren
+# Installiere Abhängigkeiten und baue das Frontend
 COPY package.json package-lock.json ./
-RUN npm install --frozen-lockfile
-
-# Source-Code kopieren und Build erstellen
+RUN npm install
 COPY . .
 RUN npm run build
 
-# Schritt 2: Bereitstellung mit Nginx
+# Nginx für die Bereitstellung des Frontends
 FROM nginx:alpine
-
-# Standard-Nginx-Konfiguration entfernen (optional)
-RUN rm -rf /usr/share/nginx/html/*
-
-# Build-Ergebnisse aus dem Builder-Container kopieren
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Optional: Nginx-Konfigurationsdatei überschreiben (falls nötig)
-# COPY nginx.conf /etc/nginx/nginx.conf
-
+# Standard-HTTP-Port
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]

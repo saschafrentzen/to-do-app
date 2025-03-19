@@ -1,20 +1,21 @@
-# Verwende ein schlankes Node.js-Image
+# Basis-Image mit Node.js
 FROM node:18-alpine
 
-# Setze das Arbeitsverzeichnis in Docker
+# Setze das Arbeitsverzeichnis
 WORKDIR /app
 
-# Kopiere nur package.json und package-lock.json (um den Cache zu nutzen)
+# Kopiere package.json und package-lock.json (um den Cache zu nutzen)
 COPY package.json package-lock.json ./
 
-# Installiere die Abhängigkeiten
-RUN npm install
+# Installiere nur die Abhängigkeiten
+RUN npm install --production
 
-# Kopiere den Rest des Codes
+# Kopiere den gesamten Code ins Image
 COPY . .
 
-# Port für den Server freigeben
+# Setze den Port für den Container
 EXPOSE 3050
 
-# Starte die Anwendung
+# Starte den Node.js-Server
 CMD ["node", "server.js"]
+
